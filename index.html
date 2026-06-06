@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MoodViz · 情绪日记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh}header{background:#161b22;border-bottom:1px solid #30363d;padding:14px 24px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;justify-content:space-between}.logo{font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#d29922,#58a6ff);border-radius:7px;display:flex;align-items:center;justify-content:center}main{max-width:800px;margin:0 auto;padding:24px 20px}.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:16px}.section-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:#f0f6fc}.mood-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}.mood-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:2px solid #30363d;background:transparent;border-radius:12px;cursor:pointer;transition:all .2s;font-size:24px}.mood-btn:hover{border-color:#58a6ff;background:rgba(88,166,255,.08);transform:translateY(-2px)}.mood-btn.active{border-color:#58a6ff;background:rgba(88,166,255,.12)}.mood-label{font-size:11px;color:#8b949e;font-weight:500}.mood-btn.active .mood-label{color:#58a6ff}.note-area{width:100%;min-height:80px;resize:vertical;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px;color:#c9d1d9;font-size:14px;line-height:1.5;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif}.note-area:focus{border-color:#58a6ff}.btn{padding:9px 20px;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}.btn-primary{background:#58a6ff;color:#fff}.btn-primary:hover{opacity:.88;transform:translateY(-1px)}.btn-ghost{background:transparent;border:1px solid #30363d;color:#c9d1d9}.btn-ghost:hover{border-color:#58a6ff;color:#58a6ff}.btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}.entry{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #21262d;align-items:flex-start}.entry:last-child{border:none}.entry-emoji{font-size:24px;flex-shrink:0;width:36px;text-align:center}.entry-date{font-size:11px;color:#8b949e;margin-bottom:2px}.entry-mood{font-size:13px;font-weight:600;margin-bottom:4px}.entry-note{font-size:13px;color:#8b949e;line-height:1.4}.streak-bar{display:flex;gap:3px;overflow-x:auto;padding-bottom:8px}.streak-day{width:24px;height:24px;border-radius:4px;background:#21262d;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#30363d;position:relative}.streak-day.filled{background:rgba(88,166,255,.3);color:#58a6ff}.streak-day.high{background:rgba(88,166,255,.6);color:#58a6ff}.stats-row{display:flex;gap:20px;flex-wrap:wrap}.stat-item{text-align:center}.stat-value{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#58a6ff}.stat-label{font-size:11px;color:#8b949e;margin-top:2px}.tab-bar{display:flex;gap:4px;margin-bottom:16px}.tab-btn{padding:6px 14px;border:1px solid #30363d;background:transparent;color:#8b949e;border-radius:8px;cursor:pointer;font-size:12px;transition:all .2s}.tab-btn.active{background:rgba(88,166,255,.1);border-color:#58a6ff;color:#58a6ff}.hidden{display:none}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#161b22;border:1px solid #3fb950;color:#c9d1d9;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:200}.toast.show{transform:translateX(-50%) translateY(0);opacity:1}</style></head><body>
+<header><div class="logo"><div class="logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg></div>MoodViz</div><div style="font-size:12px;color:#8b949e"><span id="todayDate"></span></div></header>
+<main>
+<div class="tab-bar"><button class="tab-btn active" onclick="showTab('log')">📝 记录</button><button class="tab-btn" onclick="showTab('history')">📊 回顾</button></div>
+
+<div id="logTab">
+  <div class="card"><div class="section-title">今天感觉怎么样？</div>
+  <div class="mood-grid" id="moodGrid"></div>
+  <textarea class="note-area" id="noteInput" placeholder="记录下为什么有这种感觉...（可选）"></textarea>
+  <div class="btn-row"><button class="btn btn-primary" onclick="saveEntry()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg> 保存</button></div></div>
+  <div class="card"><div class="section-title">今天 7 天内</div><div class="streak-bar" id="weekBar"></div></div>
+</div>
+
+<div id="historyTab" class="hidden">
+  <div class="card"><div class="section-title">📊 统计数据</div><div class="stats-row" id="statsRow"></div></div>
+  <div class="card"><div id="historyList"></div></div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const MOODS=[
+  {emoji:'😊',label:'很好',score:5,color:'#3fb950'},
+  {emoji:'😌',label:'不错',score:4,color:'#58a6ff'},
+  {emoji:'😐',label:'一般',score:3,color:'#d29922'},
+  {emoji:'😔',label:'不好',score:2,color:'#f0883e'},
+  {emoji:'😢',label:'很差',score:1,color:'#f85149'}
+];
+const MOOD_JOYS=[{emoji:'🌈',label:'开心',score:5},{emoji:'🌟',label:'温馨',score:4},{emoji:'🌿',label:'平静',score:3},{emoji:'☕',label:'疲惫',score:2},{emoji:'🌧',label:'低落',score:1}];
+let selected=null;
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function fmt(d){const dt=new Date(d);return `${dt.getMonth()+1}/${dt.getDate()}`}
+
+function initMoodGrid(){
+  const grid=document.getElementById('moodGrid');
+  grid.innerHTML=MOODS.map((m,i)=>`
+    <div class="mood-btn" data-idx="${i}" onclick="selectMood(${i})">
+      <span>${m.emoji}</span>
+      <span class="mood-label">${m.label}</span>
+    </div>
+  `).join('');
+}
+
+function selectMood(i){
+  selected=i;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.idx)===i));
+}
+
+function saveEntry(){
+  if(selected===null){toast('请选择一个心情');return}
+  const entry={date:new Date().toISOString().slice(0,10),moodIdx:selected,note:document.getElementById('noteInput').value.trim()||''};
+  let log=JSON.parse(localStorage.getItem('moodviz_log')||'[]');
+  const existing=log.findIndex(e=>e.date===entry.date);
+  if(existing>=0)log[existing]=entry;else log.push(entry);
+  localStorage.setItem('moodviz_log',JSON.stringify(log));
+  toast('✅ 已保存');
+  renderWeek();
+  document.getElementById('noteInput').value='';
+  selected=null;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+}
+
+function renderWeek(){
+  const bar=document.getElementById('weekBar');
+  const log=JSON.parse(localStorage.getItem('moodviz_log')||'[]');
+  const days=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  bar.innerHTML=days.map(d=>{
+    const entry=log.find(e=>e.date===d);
+    const cls=entry?`filled ${entry.moodIdx>=3?'high':''}`:'';
+    const emoji=entry?MOODS[entry.moodIdx].emoji:'';
+    return `<div class="streak-day ${cls}">${emoji||''}</div>`;
+  }).join('');
+}
+
+function renderStats(){
+  const log=JSON.parse(localStorage.getItem('moodviz_log')||'[]');
+  if(!log.length){document.getElementById('statsRow').innerHTML='<span style="color:#8b949e;font-size:13px">暂无数据</span>';return}
+  const total=log.length;const avg=log.reduce((s,e)=>s+MOODS[e.moodIdx].score,0)/total;
+  const streaks=[];let cur=0;
+  const dates=[...new Set(log.map(e=>e.date))].sort();
+  for(const d of dates){
+    const entry=log.find(e=>e.date===d);
+    if(entry&&entry.moodIdx>=3)cur++;else{streaks.push(cur);cur=0}
+  }
+  streaks.push(cur);
+  const bestStreak=Math.max(...streaks,0);
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">记录天数</div></div>
+    <div class="stat-item"><div class="stat-value">${avg.toFixed(1)}</div><div class="stat-label">平均分</div></div>
+    <div class="stat-item"><div class="stat-value">${bestStreak}</div><div class="stat-label">最长好心情</div></div>
+  `;
+}
+
+function renderHistory(){
+  const log=JSON.parse(localStorage.getItem('moodviz_log')||'[]');
+  const div=document.getElementById('historyList');
+  if(!log.length){div.innerHTML='<div style="color:#8b949e;font-size:13px;text-align:center;padding:40px">还没有记录，开始记录你的心情吧 🌈</div>';return}
+  div.innerHTML=[...log].reverse().map(e=>{
+    const m=MOODS[e.moodIdx];
+    return `<div class="entry">
+      <div class="entry-emoji">${m.emoji}</div>
+      <div><div class="entry-date">${e.date} · ${m.label}</div>${e.note?`<div class="entry-note">${e.note}</div>`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function showTab(t){document.getElementById('logTab').classList.toggle('hidden',t!=='log');document.getElementById('historyTab').classList.toggle('hidden',t!=='history');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.textContent.includes(t==='log'?'记录':'回顾')));if(t==='history'){renderStats();renderHistory()}}
+
+document.getElementById('todayDate').textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});
+initMoodGrid();renderWeek();
+</script></body></html>
